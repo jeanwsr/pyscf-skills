@@ -5,13 +5,6 @@ description: Skill for developing the pyscf.dh double-hybrid DFT module. Covers 
 
 # pyscf.dh Development
 
-**MOST IMPORTANT**: ALWAYS ask before reverting or refactoring. This includes:
-- Reverting partial work mid-implementation in build mode
-- Reverting a prior design decision
-- Refactoring that touches multiple files
-- Changing the class hierarchy
-Never unilaterally discard changes. Present a plan and get approval first.
-
 ## Module Structure
 
 ```
