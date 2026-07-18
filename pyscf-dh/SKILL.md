@@ -303,7 +303,11 @@ d = DFDH(mol, xc).run().nuc_grad_method().dipole()
 
 Run the minimal test subset matching the scope of changes. Avoid numdiff tests for quick iteration — use hardcoded reference tests instead.
 
-**Use the `@test` subagent**: Invoke `@test auto` to auto-discover which tests to run based on `git diff`. The subagent maps changed files to the test table below and runs the minimal subset automatically. You can also pass specific test paths: `@test pyscf/dh/test/test_xccode.py -v`.
+**Use the `@test` subagent**: Invoke `@test auto` for quick auto-discovery
+(maps changed files → corresponding test files via heuristic). For the
+DH-specific minimal subset (much faster than running full test files), use the
+table below to pass explicit test paths: `@test pyscf/dh/test/test_xccode.py
+pyscf/dh/test/test_rdfdh.py -v`.
 
 ### By file changed
 

@@ -190,6 +190,14 @@ pytest pyscf/scf/test/ -k "_high_cost"      # include expensive
 pytest pyscf/scf/test/test_rhf.py::KnownValues::test_init_guess_chk
 ```
 
+### `@test` subagent
+
+Use the `@test` subagent to run tests with automatic ruff linting:
+
+- `@test auto` — auto-discovers which tests to run based on `git diff`
+- `@test pyscf/scf/test/test_rhf.py -v` — specific test file
+- `@test pyscf/scf/test/ -v` — whole test directory
+
 ### Linting
 ```bash
 ruff check --config .ruff.toml pyscf
