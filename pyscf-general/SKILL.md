@@ -155,6 +155,9 @@ Custom functionals persist in `_CUSTOM_FUNC_R` / `_CUSTOM_FUNC_U` until explicit
 - Single `KnownValues(unittest.TestCase)` class per test file
 - Module-level `setUpModule()` / `tearDownModule()` for shared expensive objects
 
+### Validation geometries
+- Numerical validation (reproducers, accuracy checks, benchmarks) MUST take molecular geometries from existing pyscf tests or examples — never hand-construct coordinates.
+
 ### Patterns
 ```python
 def setUpModule():
