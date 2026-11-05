@@ -5,40 +5,20 @@ description: Skill for developing in the PySCF quantum chemistry codebase. Provi
 
 # PySCF Development
 
-## Project Overview
+## Repo-local guidance (agent-recipes)
 
-PySCF is a Python-based quantum chemistry framework. The package lives under `pyscf/` with C/C++ extensions compiled via CMake. The top-level `pyscf/__init__.py` exports version and plugin discovery; computational modules are organized by method family.
+The PySCF core repo (`/home/wsr/pyscf`) maintains its own agent guidance:
 
-## Module Hierarchy
+- `agent-recipes/agents/AGENTS.md` — repository layout, development environment
+  (BLAS threading, tmpdir, uv/venv, native C builds), code style, validation,
+  and AI-disclosure rules. **Read this first when working in `/home/wsr/pyscf`.**
+- `agent-recipes/skills/pyscf-coding-style.template.md` — Python coding-style
+  template; consult when writing, modifying, or reviewing PySCF Python code.
 
-| Submodule | Purpose |
-|---|---|
-| `pyscf/lib/` | Foundation: `StreamObject` base class, C-extension loader, numpy/linalg wrappers, logging, DIIS, chkfile I/O, parameters |
-| `pyscf/gto/` | Molecular structure, basis set parsing, `libcint` integral interface |
-| `pyscf/scf/` | Hartree-Fock (RHF, UHF, ROHF, GHF, DHF) |
-| `pyscf/dft/` | Kohn-Sham DFT (inherits from SCF) |
-| `pyscf/cc/` | Coupled cluster (CCSD, CCSDT, CCSDTQ, EOM) |
-| `pyscf/ci/` | Configuration interaction (CISD) |
-| `pyscf/mcscf/` | CASCI, CASSCF (1-step and 2-step) |
-| `pyscf/mcpdft/` | MC-PDFT (on-top pair-density functionals) |
-| `pyscf/df/` | Density fitting / RI |
-| `pyscf/ao2mo/` | AO-to-MO integral transformation |
-| `pyscf/pbc/` | Periodic boundary conditions (mirrors molecular module hierarchy) |
-| `pyscf/tools/` | FCIDUMP, molden, cubegen exporters |
-| `pyscf/solvent/` | Continuum solvation |
-| `pyscf/fci/` | Full CI solvers |
-| `pyscf/mp/` | MP2, MP3, MP4 |
-| `pyscf/tdscf/` | Time-dependent HF/DFT |
-| `pyscf/grad/` | Nuclear gradients |
-| `pyscf/hessian/` | Hessians |
-| `pyscf/geomopt/` | Geometry optimization |
-| `pyscf/x2c/` | Exact two-component relativistic methods |
-| `pyscf/symm/` | Point-group symmetry |
-| `pyscf/agf2/` | Algebraic Green's function GW |
-| `pyscf/adc/` | Algebraic diagrammatic construction |
-| `pyscf/mrpt/` | Multi-reference perturbation theory |
-| `pyscf/eph/` | Electron-phonon coupling |
-| `pyscf/data/` | Physical constants, element data |
+Method packages live one-per-directory under `pyscf/` (`gto`, `scf`, `dft`,
+`cc`, `ci`, `mcscf`, `fci`, `mp`, `df`, `ao2mo`, `grad`, `hessian`, `geomopt`,
+`tdscf`, `pbc`, ...); foundation and C extensions in `pyscf/lib/`, constants in
+`pyscf/data/`. See the repo-local AGENTS.md for details.
 
 ## Key Abstractions
 
@@ -291,6 +271,19 @@ gh api repos/pyscf/pyscf/issues/2864/timeline
 - After reviewing the diff, `gh pr checkout` to test locally.
 - `gh run list` + `gh run watch` to track CI status for a PR branch.
 - When investigating a bug report: `gh issue view --comments` first, then search for duplicates/related issues, then check the timeline for linked PRs.
+
+### Review checklist (technical)
+
+Run the branch, don't just read it. Suggested order:
+
+1. Scope first: `gh pr view --json title,body,files,additions,deletions` — identify data/database files (skip in detail) vs code.
+2. Read `gh pr diff` fully. Trace each changed data format through ALL consumers (`rg` for unpack patterns like `rl, nl, hl = proj`); a format change without updated consumers is a classic break.
+3. Check the diff for unrelated cleanup (removed demo blocks, reformatting) — flag, don't block.
+4. Check out and run the NEW tests, plus the surrounding module's tests for regressions (in-place vs worktree mechanics: see `pyscf-local-dev`). Compare a representative numeric result against master when a refactor touches numerics (e.g. `lib.fp` of the key tensor, master vs PR) — identical output proves the refactor neutral.
+5. Watch for behavior changes to existing users (new flags must be opt-in with unchanged defaults), version-fragile or platform-dependent APIs, exception handling that escapes fallback chains, dead branches, and misleading asserts.
+6. Verify inheritance covers the claimed feature reach (e.g. GKS gets `get_hcore` from GHF) and that gated attributes (`mol._pseudo`) actually exist.
+7. Lint changed files with the repo's flake8 config — a clean config run should have no violations at all.
+8. State findings with severity, and label each as verified-by-test vs inferred-from-reading. If a claim fails on testing, report that.
 
 ## Common Pitfalls
 
