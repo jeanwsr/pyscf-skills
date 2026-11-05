@@ -14,6 +14,11 @@ The PySCF core repo (`/home/wsr/pyscf`) maintains its own agent guidance:
   and AI-disclosure rules. **Read this first when working in `/home/wsr/pyscf`.**
 - `agent-recipes/skills/pyscf-coding-style.template.md` — Python coding-style
   template; consult when writing, modifying, or reviewing PySCF Python code.
+- `agent-recipes/skills/pyscf-pr-review.template.md` — PR review checklist
+  (references/data, examples, reuse, behavior, performance, scientific
+  validation, PR context); consult when reviewing a contribution or checking
+  your own work before submitting/updating a PR. The technical checklist below
+  is the condensed local version.
 
 Method packages live one-per-directory under `pyscf/` (`gto`, `scf`, `dft`,
 `cc`, `ci`, `mcscf`, `fci`, `mp`, `df`, `ao2mo`, `grad`, `hessian`, `geomopt`,
@@ -274,7 +279,8 @@ gh api repos/pyscf/pyscf/issues/2864/timeline
 
 ### Review checklist (technical)
 
-Run the branch, don't just read it. Suggested order:
+Criteria: `agent-recipes/skills/pyscf-pr-review.template.md`. Run the branch,
+don't just read it. Suggested order:
 
 1. Scope first: `gh pr view --json title,body,files,additions,deletions` — identify data/database files (skip in detail) vs code.
 2. Read `gh pr diff` fully. Trace each changed data format through ALL consumers (`rg` for unpack patterns like `rl, nl, hl = proj`); a format change without updated consumers is a classic break.
@@ -282,8 +288,11 @@ Run the branch, don't just read it. Suggested order:
 4. Check out and run the NEW tests, plus the surrounding module's tests for regressions (in-place vs worktree mechanics: see `pyscf-local-dev`). Compare a representative numeric result against master when a refactor touches numerics (e.g. `lib.fp` of the key tensor, master vs PR) — identical output proves the refactor neutral.
 5. Watch for behavior changes to existing users (new flags must be opt-in with unchanged defaults), version-fragile or platform-dependent APIs, exception handling that escapes fallback chains, dead branches, and misleading asserts.
 6. Verify inheritance covers the claimed feature reach (e.g. GKS gets `get_hcore` from GHF) and that gated attributes (`mol._pseudo`) actually exist.
-7. Lint changed files with the repo's flake8 config — a clean config run should have no violations at all.
-8. State findings with severity, and label each as verified-by-test vs inferred-from-reading. If a claim fails on testing, report that.
+7. Check the template's commonly-missed code/science points: search for an existing implementation or constant table before accepting duplicate code; verify complex-valued paths get the bra/ket conjugation right; check for accidental side effects and scanner `reset`/cached-state handling; no leftover debugging code.
+8. Check tests/docs: a bug fix includes a regression test; tests assert meaningful behavior rather than merely exercising new code; a new feature has a runnable example and public-API docstrings; constants/tables cite sources and state units and transformations; performance-motivated complexity includes a benchmark.
+9. Check PR context: the description links related issues and discloses AI assistance.
+10. Lint changed files with both repo configs (`.ruff.toml` and `.flake8`; both exclude tests). Report pre-existing violations separately instead of flagging them as PR issues.
+11. State findings with severity, and label each as verified-by-test vs inferred-from-reading. If a claim fails on testing, report that.
 
 ## Common Pitfalls
 
